@@ -1,4 +1,4 @@
-const CACHE = 'solar-monitor-v6';
+const CACHE = 'solar-monitor-v7';
 const ASSETS = ['/app/', '/app/index.html', '/app/mqtt-4.min.js', '/app/manifest.json', '/app/icon-192.png', '/app/icon-512.png', '/app/icon-180.png'];
 
 self.addEventListener('install', (e) => {

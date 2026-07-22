@@ -65,6 +65,10 @@
   .cellsbtn { display: flex; justify-content: center; align-items: center; gap: 7px; width: 100%; margin-top: 16px; padding: 9px; border: 1px solid var(--accent); border-radius: 9px; background: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer; }
   .cellgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
   .cell { background: var(--raised); border: 1px solid var(--border); border-radius: 8px; padding: 7px 4px; text-align: center; }
+  .cell.hi { background: #23350f; border-color: var(--good); }
+  .cell.hi .cellv { color: var(--good); font-weight: 700; }
+  .cell.lo { background: #3a161c; border-color: var(--bad); }
+  .cell.lo .cellv { color: var(--bad); font-weight: 700; }
   .cellidx { color: var(--faint); font-size: 9px; }
   .cellv { font-size: 11px; margin-top: 2px; }
   .empty { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; padding: 8px 0; }
@@ -347,7 +351,10 @@ function packCard(p, now) {
     card.appendChild(el('button', 'cellsbtn', open ? 'Hide cell voltages ⌃' : 'Show ' + cells.length + ' cell voltages ⌄', { 'data-cells': p.mac }));
     if (open) {
       const grid = el('div', 'cellgrid');
-      cells.forEach((c, i) => grid.appendChild(el('div', 'cell', [
+      const hi = Math.max.apply(null, cells);
+      const lo = Math.min.apply(null, cells);
+      const spread = hi > lo; // perfectly balanced pack: no highlight
+      cells.forEach((c, i) => grid.appendChild(el('div', 'cell' + (spread && c === hi ? ' hi' : spread && c === lo ? ' lo' : ''), [
         el('div', 'cellidx', 'C' + (i + 1)),
         el('div', 'cellv num', c.toFixed(3)),
       ])));
