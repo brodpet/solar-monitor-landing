@@ -142,8 +142,13 @@ let connStatus = 'connecting';
 let editMode = false;
 const openCells = new Set();
 let selected = []; // [{mac, name}]
+let ignored = []; // macs the user removed — never auto-add these again
 try { selected = JSON.parse(localStorage.getItem('solarmon.packs') || '[]'); } catch {}
-const savePacks = () => localStorage.setItem('solarmon.packs', JSON.stringify(selected));
+try { ignored = JSON.parse(localStorage.getItem('solarmon.ignored') || '[]'); } catch {}
+const savePacks = () => {
+  localStorage.setItem('solarmon.packs', JSON.stringify(selected));
+  localStorage.setItem('solarmon.ignored', JSON.stringify(ignored));
+};
 
 // ---- logic (ported from the Android app) ----
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
@@ -205,9 +210,18 @@ client.on('error', () => { connStatus = 'error'; render(); });
 client.on('close', () => { if (connStatus !== 'error') connStatus = 'connecting'; render(); });
 client.on('message', (topic, payload) => {
   const now = Date.now();
-  if (topic === BROKER.topicPrefix + '/gateway/status') { gatewayLastSeen = now; render(); return; }
+  if (topic.indexOf(BROKER.topicPrefix + '/gateway') === 0) { gatewayLastSeen = now; render(); return; }
   const r = parsePackPayload(payload.toString(), now);
-  if (r) { readings[r.mac] = r; render(); }
+  if (!r) return;
+  // the gateway publishes each pack under jkbms/<pack name> — use it as display name
+  r.topicName = topic.slice(BROKER.topicPrefix.length + 1) || r.mac;
+  readings[r.mac] = r;
+  // auto-add reporting packs so a freshly set-up gateway shows its packs with no extra taps
+  if (!selected.some((p) => p.mac === r.mac) && ignored.indexOf(r.mac) < 0) {
+    selected.push({ mac: r.mac, name: r.topicName });
+    savePacks();
+  }
+  render();
 });
 setInterval(render, 5000); // staleness ticks
 
@@ -266,19 +280,19 @@ function render() {
     for (const p of sel) parts.push(packCard(p, now));
   } else {
     const hint = el('div', 'hint');
-    hint.append(el('b', null, 'Welcome! '), 'This monitor shows battery packs publishing to your solar broker. Packs that are currently reporting appear below — tap ', el('b', null, 'Add'), ' to put them on your dashboard.');
+    hint.append(el('b', null, 'Welcome! '), 'Battery packs publishing to your solar broker appear here automatically once a gateway is set up and online — no extra steps needed.');
     parts.push(hint);
   }
-  if (editMode || !selected.length) {
+  if ((editMode || !selected.length) && discovered.length) {
     const disc = el('div', 'discover', [
-      el('h3', null, discovered.length ? 'Packs reporting on the broker' : 'Listening for packs…'),
-      el('p', null, discovered.length ? 'Tap Add to monitor a pack.' : 'Nothing new is publishing right now. Make sure a gateway is set up and online.'),
+      el('h3', null, 'Hidden packs reporting on the broker'),
+      el('p', null, 'Tap Add to put a pack back on your dashboard.'),
     ]);
     for (const r of discovered) {
       disc.appendChild(el('div', 'discrow', [
         el('div', null, [
-          el('div', 'discmac num', r.mac),
-          el('div', 'discsoc num', 'SOC ' + r.soc + '% · ' + r.voltage.toFixed(1) + ' V'),
+          el('div', 'discmac num', r.topicName || r.mac),
+          el('div', 'discsoc num', r.mac + ' · SOC ' + r.soc + '% · ' + r.voltage.toFixed(1) + ' V'),
         ]),
         el('button', 'addbtn', 'Add', { 'data-add': r.mac }),
       ]));
@@ -347,12 +361,15 @@ document.getElementById('content').addEventListener('click', (e) => {
   const remove = t.getAttribute && t.getAttribute('data-remove');
   const cells = t.getAttribute && t.getAttribute('data-cells');
   if (add) {
-    const name = prompt('Name this pack', 'Pack ' + (selected.length + 1));
+    const auto = (readings[add] && readings[add].topicName) || 'Pack ' + (selected.length + 1);
+    const name = prompt('Name this pack', auto);
     if (name === null) return;
-    selected.push({ mac: add, name: name.trim() || 'Pack ' + (selected.length + 1) });
+    ignored = ignored.filter((m) => m !== add);
+    selected.push({ mac: add, name: name.trim() || auto });
     savePacks(); render();
   } else if (remove) {
     selected = selected.filter((p) => p.mac !== remove);
+    if (ignored.indexOf(remove) < 0) ignored.push(remove);
     savePacks(); render();
   } else if (cells) {
     openCells.has(cells) ? openCells.delete(cells) : openCells.add(cells);
