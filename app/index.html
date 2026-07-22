@@ -129,12 +129,19 @@ if (!window.__mqttLoadFailed && typeof mqtt === 'undefined') {
 </script>
 <script>
 'use strict';
+// ?g=<group> selects which gateway group (topic prefix) this dashboard shows; default is the main one
+const GROUP = ((new URLSearchParams(location.search).get('g') || 'jkbms').toLowerCase().replace(/[^a-z0-9_-]/g, '')) || 'jkbms';
 const BROKER = {
   url: 'wss://f5506f1eb31c415b88d7ba6707b7fafe.s1.eu.hivemq.cloud:8884/mqtt',
   username: 'jkbms',
   password: 'jkbmsapp',
-  topicPrefix: 'jkbms',
+  topicPrefix: GROUP,
 };
+if (GROUP !== 'jkbms') {
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('.eyebrow').textContent = 'LIVE TELEMETRY · ' + GROUP.toUpperCase();
+  });
+}
 const STALE_MS = 60000;
 const FLOOR_SOC = 20;
 const colors = { good: '#b8f34a', warn: '#ffb84d', bad: '#ff6874', faint: '#607385' };
@@ -147,11 +154,13 @@ let editMode = false;
 const closedCells = new Set(); // cells are open by default; this tracks packs the user collapsed
 let selected = []; // [{mac, name}]
 let ignored = []; // macs the user removed — never auto-add these again
-try { selected = JSON.parse(localStorage.getItem('solarmon.packs') || '[]'); } catch {}
-try { ignored = JSON.parse(localStorage.getItem('solarmon.ignored') || '[]'); } catch {}
+// per-group storage so each dashboard keeps its own selection (default group keeps legacy keys)
+const KEY = GROUP === 'jkbms' ? 'solarmon' : 'solarmon.' + GROUP;
+try { selected = JSON.parse(localStorage.getItem(KEY + '.packs') || '[]'); } catch {}
+try { ignored = JSON.parse(localStorage.getItem(KEY + '.ignored') || '[]'); } catch {}
 const savePacks = () => {
-  localStorage.setItem('solarmon.packs', JSON.stringify(selected));
-  localStorage.setItem('solarmon.ignored', JSON.stringify(ignored));
+  localStorage.setItem(KEY + '.packs', JSON.stringify(selected));
+  localStorage.setItem(KEY + '.ignored', JSON.stringify(ignored));
 };
 
 // ---- logic (ported from the Android app) ----
