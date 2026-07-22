@@ -101,7 +101,9 @@
 
 <script>
 // surface any script failure visibly instead of a silently dead page
+window.__errors = [];
 window.onerror = function (msg, src, line) {
+  window.__errors.push(msg + ' @ ' + (src || '?') + ':' + line);
   var box = document.getElementById('errbox');
   if (!box) {
     box = document.createElement('div');
@@ -111,10 +113,16 @@ window.onerror = function (msg, src, line) {
     if (content && content.parentNode) content.parentNode.insertBefore(box, content);
     else document.body.appendChild(box);
   }
-  box.textContent = 'App error: ' + msg + ' (line ' + line + '). Try updating your browser, then reload.';
+  box.textContent = 'Errors: ' + window.__errors.join(' || ') + ' — Browser: ' + navigator.userAgent;
 };
+window.__mqttLoadFailed = false;
 </script>
-<script src="mqtt-4.min.js"></script>
+<script src="mqtt-4.min.js" onerror="window.__mqttLoadFailed = true; window.onerror('mqtt-4.min.js FAILED TO LOAD (network or blocked)', 'loader', 0)"></script>
+<script>
+if (!window.__mqttLoadFailed && typeof mqtt === 'undefined') {
+  window.onerror('mqtt-4.min.js loaded but did not define mqtt (parse failure — engine too old?)', 'loader', 0);
+}
+</script>
 <script>
 'use strict';
 const BROKER = {
