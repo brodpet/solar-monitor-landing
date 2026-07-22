@@ -1,5 +1,5 @@
-const CACHE = 'solar-monitor-v3';
-const ASSETS = ['.', 'index.html', 'mqtt-4.min.js', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
+const CACHE = 'solar-monitor-v4';
+const ASSETS = ['/app/', '/app/index.html', '/app/mqtt-4.min.js', '/app/manifest.json', '/app/icon-192.png', '/app/icon-512.png', '/app/icon-180.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));

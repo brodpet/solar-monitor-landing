@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Solar Monitor</title>
 <meta name="description" content="Live solar battery telemetry.">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="/app/manifest.json">
+<link rel="icon" href="/app/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/app/icon-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -117,7 +117,7 @@ window.onerror = function (msg, src, line) {
 };
 window.__mqttLoadFailed = false;
 </script>
-<script src="mqtt-4.min.js" onerror="window.__mqttLoadFailed = true; window.onerror('mqtt-4.min.js FAILED TO LOAD (network or blocked)', 'loader', 0)"></script>
+<script src="/app/mqtt-4.min.js" onerror="window.__mqttLoadFailed = true; window.onerror('mqtt-4.min.js FAILED TO LOAD (network or blocked)', 'loader', 0)"></script>
 <script>
 if (!window.__mqttLoadFailed && typeof mqtt === 'undefined') {
   window.onerror('mqtt-4.min.js loaded but did not define mqtt (parse failure — engine too old?)', 'loader', 0);
@@ -360,7 +360,7 @@ document.getElementById('content').addEventListener('click', (e) => {
   }
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app/sw.js');
 render();
 </script>
 </body>
