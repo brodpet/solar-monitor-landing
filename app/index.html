@@ -129,8 +129,11 @@ if (!window.__mqttLoadFailed && typeof mqtt === 'undefined') {
 </script>
 <script>
 'use strict';
-// ?g=<group> selects which gateway group (topic prefix) this dashboard shows; default is the main one
-const GROUP = ((new URLSearchParams(location.search).get('g') || 'jkbms').toLowerCase().replace(/[^a-z0-9_-]/g, '')) || 'jkbms';
+// ?g=<n> selects which gateway's dashboard this is: 1 (or no param) = main, 2 = second gateway, …
+// Numbers map to topic prefixes jkbms, jkbms2, jkbms3… Non-numeric values are kept as raw prefixes.
+const RAW_G = (new URLSearchParams(location.search).get('g') || '1').toLowerCase().replace(/[^a-z0-9_-]/g, '') || '1';
+const IS_NUM = /^[0-9]+$/.test(RAW_G);
+const GROUP = IS_NUM ? (RAW_G === '1' ? 'jkbms' : 'jkbms' + RAW_G) : RAW_G;
 const BROKER = {
   url: 'wss://f5506f1eb31c415b88d7ba6707b7fafe.s1.eu.hivemq.cloud:8884/mqtt',
   username: 'jkbms',
@@ -139,7 +142,7 @@ const BROKER = {
 };
 if (GROUP !== 'jkbms') {
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelector('.eyebrow').textContent = 'LIVE TELEMETRY · ' + GROUP.toUpperCase();
+    document.querySelector('.eyebrow').textContent = 'LIVE TELEMETRY · ' + (IS_NUM ? 'GATEWAY ' + RAW_G : RAW_G.toUpperCase());
   });
 }
 const STALE_MS = 60000;
