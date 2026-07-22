@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/app/:group([a-z0-9_-]+)", "destination": "/app/index.html" }
+  ]
+}

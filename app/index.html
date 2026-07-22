@@ -129,9 +129,10 @@ if (!window.__mqttLoadFailed && typeof mqtt === 'undefined') {
 </script>
 <script>
 'use strict';
-// ?g=<n> selects which gateway's dashboard this is: 1 (or no param) = main, 2 = second gateway, …
-// Numbers map to topic prefixes jkbms, jkbms2, jkbms3… Non-numeric values are kept as raw prefixes.
-const RAW_G = (new URLSearchParams(location.search).get('g') || '1').toLowerCase().replace(/[^a-z0-9_-]/g, '') || '1';
+// /app/<n> (preferred; survives Add to Home Screen) or ?g=<n> selects the gateway dashboard:
+// 1 (or nothing) = main, 2 = second gateway, … Numbers map to prefixes jkbms, jkbms2, jkbms3…
+const PATH_G = (location.pathname.match(/^\/app\/([a-z0-9_-]+)\/?$/) || [])[1];
+const RAW_G = (PATH_G || new URLSearchParams(location.search).get('g') || '1').toLowerCase().replace(/[^a-z0-9_-]/g, '') || '1';
 const IS_NUM = /^[0-9]+$/.test(RAW_G);
 const GROUP = IS_NUM ? (RAW_G === '1' ? 'jkbms' : 'jkbms' + RAW_G) : RAW_G;
 const BROKER = {
