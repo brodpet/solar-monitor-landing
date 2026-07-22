@@ -140,7 +140,7 @@ const readings = {}; // mac -> reading
 let gatewayLastSeen = null;
 let connStatus = 'connecting';
 let editMode = false;
-const openCells = new Set();
+const closedCells = new Set(); // cells are open by default; this tracks packs the user collapsed
 let selected = []; // [{mac, name}]
 let ignored = []; // macs the user removed — never auto-add these again
 try { selected = JSON.parse(localStorage.getItem('solarmon.packs') || '[]'); } catch {}
@@ -339,12 +339,15 @@ function packCard(p, now) {
     detail('Capacity', r.capacity.toFixed(1) + ' Ah'),
     detail('Temps', r.temp1.toFixed(0) + '° / ' + r.temp2.toFixed(0) + '° C'),
   ]));
-  if (r.cells.length) {
-    const open = openCells.has(p.mac);
-    card.appendChild(el('button', 'cellsbtn', open ? 'Hide cell voltages ⌃' : 'Show ' + r.cells.length + ' cell voltages ⌄', { 'data-cells': p.mac }));
+  // the gateway always sends 16 slots; unpopulated ones read 0 — show only real cells
+  // (4 = 12V pack, 8 = 24V, 16 = 48V)
+  const cells = r.cells.filter((c) => c > 1);
+  if (cells.length) {
+    const open = !closedCells.has(p.mac);
+    card.appendChild(el('button', 'cellsbtn', open ? 'Hide cell voltages ⌃' : 'Show ' + cells.length + ' cell voltages ⌄', { 'data-cells': p.mac }));
     if (open) {
       const grid = el('div', 'cellgrid');
-      r.cells.forEach((c, i) => grid.appendChild(el('div', 'cell', [
+      cells.forEach((c, i) => grid.appendChild(el('div', 'cell', [
         el('div', 'cellidx', 'C' + (i + 1)),
         el('div', 'cellv num', c.toFixed(3)),
       ])));
@@ -372,7 +375,7 @@ document.getElementById('content').addEventListener('click', (e) => {
     if (ignored.indexOf(remove) < 0) ignored.push(remove);
     savePacks(); render();
   } else if (cells) {
-    openCells.has(cells) ? openCells.delete(cells) : openCells.add(cells);
+    closedCells.has(cells) ? closedCells.delete(cells) : closedCells.add(cells);
     render();
   }
 });
