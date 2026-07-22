@@ -141,6 +141,12 @@ const BROKER = {
   topicPrefix: GROUP,
 };
 if (GROUP !== 'jkbms') {
+  // The manifest pins start_url to /app/ which would strip ?g= when installed to the
+  // home screen. Removing it makes the browser bookmark the exact current URL instead,
+  // so each numbered dashboard installs as its own app pointing at its own gateway.
+  var manifestLink = document.querySelector('link[rel="manifest"]');
+  if (manifestLink) manifestLink.parentNode.removeChild(manifestLink);
+  document.title = 'Solar Monitor ' + (IS_NUM ? RAW_G : RAW_G.toUpperCase());
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('.eyebrow').textContent = 'LIVE TELEMETRY · ' + (IS_NUM ? 'GATEWAY ' + RAW_G : RAW_G.toUpperCase());
   });
