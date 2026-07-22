@@ -99,6 +99,21 @@
   <div id="content"></div>
   <div class="footer">Read-only monitor · MQTT over WebSocket</div>
 
+<script>
+// surface any script failure visibly instead of a silently dead page
+window.onerror = function (msg, src, line) {
+  var box = document.getElementById('errbox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'errbox';
+    box.style.cssText = 'background:#3a1a1f;border:1px solid #ff6874;color:#ffd7da;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:14px;word-break:break-word;';
+    var content = document.getElementById('content');
+    if (content && content.parentNode) content.parentNode.insertBefore(box, content);
+    else document.body.appendChild(box);
+  }
+  box.textContent = 'App error: ' + msg + ' (line ' + line + '). Try updating your browser, then reload.';
+};
+</script>
 <script src="mqtt.min.js"></script>
 <script>
 'use strict';
@@ -263,7 +278,8 @@ function render() {
     parts.push(disc);
   }
   const content = document.getElementById('content');
-  content.replaceChildren(...parts);
+  while (content.firstChild) content.removeChild(content.firstChild);
+  for (const part of parts) content.appendChild(part);
 }
 
 function packCard(p, now) {
