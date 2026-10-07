@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flash Gateway — Solar Monitor</title>
+<meta name="description" content="Install the JK BMS gateway firmware on an ESP32 from your browser.">
+<link rel="icon" href="/app/icon-192.png" type="image/png">
+<script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+<style>
+  :root {
+    --bg: #0b1017;
+    --surface: #121a24;
+    --border: #1e2936;
+    --text: #e8eef5;
+    --dim: #8fa0b3;
+    --accent: #34d399;
+    --accent-ink: #06281c;
+    --warn: #fbbf24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+  .icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    background: linear-gradient(160deg, #162436, #0e1620);
+    border: 1px solid var(--border);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 46px;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 32px; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .sub { color: var(--dim); font-size: 15px; line-height: 1.55; margin-bottom: 28px; }
+  .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    padding: 16px 42px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+  }
+  .btn:active { opacity: 0.85; }
+  .notice {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--warn);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .meta { color: var(--dim); font-size: 12px; margin-bottom: 34px; }
+  .steps {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    margin-bottom: 14px;
+  }
+  .steps h2 { font-size: 13px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .steps ol, .steps ul { padding-left: 18px; color: var(--dim); font-size: 13px; line-height: 1.9; }
+  .steps b { color: var(--text); }
+  code { font-family: ui-monospace, Consolas, monospace; color: var(--text); }
+  .foot { color: #55677c; font-size: 11px; margin-top: 26px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🔌</div>
+    <div class="eyebrow">GATEWAY FIRMWARE</div>
+    <h1>Flash Gateway</h1>
+    <p class="sub">Install the JK BMS gateway firmware on an ESP32 board straight from your browser — no tools to install.</p>
+    <esp-web-install-button manifest="/flash/manifest.json">
+      <button slot="activate" class="btn">⚡&nbsp; Install Firmware</button>
+      <div slot="unsupported" class="notice">This browser can't talk to USB devices. Open this page in Chrome or Edge on a desktop computer.</div>
+      <div slot="not-allowed" class="notice">Flashing needs a secure connection. Open this page over https.</div>
+    </esp-web-install-button>
+    <div class="meta">Build 2383d4c · ESP32 (esp32dev) · Chrome / Edge desktop</div>
+    <div class="steps">
+      <h2>Flash</h2>
+      <ol>
+        <li>Plug the ESP32 into this computer with a USB data cable.</li>
+        <li>Click Install Firmware and pick the board's serial port.</li>
+        <li>Choose to erase the device, then wait for it to finish.</li>
+      </ol>
+    </div>
+    <div class="steps">
+      <h2>Then set up</h2>
+      <ol>
+        <li>Open the Solar Monitor app on your phone.</li>
+        <li>Join the Wi-Fi hotspot <b>JK-BMS-Gateway-XXXX</b> — password <code>jkbmsgateway</code>.</li>
+        <li>Run the setup wizard in the app.</li>
+      </ol>
+    </div>
+    <div class="steps">
+      <h2>No port showing?</h2>
+      <ul>
+        <li>Try another cable — many are charge-only.</li>
+        <li>Install the USB driver for your board: CP210x or CH340.</li>
+        <li>If it won't connect, hold the BOOT button while clicking Install.</li>
+      </ul>
+    </div>
+    <p class="foot">Erasing wipes any saved Wi-Fi and gateway settings on the board.</p>
+  </div>
+</body>
+</html>
